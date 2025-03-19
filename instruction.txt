@@ -1,0 +1,38 @@
+Uruchomienie aplikacji webowej (wymagany system linux, nie testowane na windowsie)
+
+1. utworzenie wirtualnego srodowiska dla pythona w folderze projektu z komendą:
+
+python3 -m venv venv
+
+2. uruchomienie środowiska env:
+
+source venv/bin/activate
+
+3. instalacja wszystkich wymaganych plików z pomocą pip:
+
+pip install -r requirements.txt
+
+4. w celach developerskich, uruchomienie aplikacji z poziomu terminala:
+
+python3 app.py
+
+5. uruchomienie przeglądarki internetowej i wejscie na aplikacje webową pod adresem:
+
+127.0.0.1:5000/
+
+6. Po uruchomieniu aplikacji, powinniśmy zostać przekierowani na odpowiedni endpoint do logowania. Jeżeli nie będzie to miało miejsca, należy udać się pod adres:
+
+127.0.0.1:5000/login
+
+I wszystko powinno działać jeżeli nie popełniliśmy błędu w trakcie uruchamiania aplikacji.
+
+
+Dokumentacja API dostępna pod adresem: 127.0.0.1:5000/apidocs
+
+
+Dodatkowe zabezpieczenia z poziomu serwera, gdyby trzeba było wystawić aplikacje do internetu:
+
+- Uruchomienie firewalla i odblokowanie dostepu dla nas na ssh (port 22 lub ustalony inny, dodatkowo najlpiej stworzyc sobie klucz i logowac sie z certyfikatem) oraz https (port 443). Http (port 80) nie jest potrzebne na aplikacji wychodzacej na internet.
+- Postawienie systemów IDS/IPS w celu wykrywania niechcianego ruchu sieciowego na serwerze i blokowanie, np masy pingow ICMP lub Syn.
+- Dodanie serwera mailowego który będzie wysyłać informacje mailowo do użytkownika by potwierdzić rejestracje i o niechcianych zmianach hasel/loginow/maili/plikow na jego koncie.
+

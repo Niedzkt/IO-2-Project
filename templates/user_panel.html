@@ -1,0 +1,130 @@
+{% extends 'base.html' %}
+{% block content %}
+<div id="content" class="container-fluid flex-grow-1 p-4" data-bs-theme="dark">
+    <h2>Profil użytkownika</h2>
+
+    <!-- Wyświetlanie komunikatów flash -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <div class="card p-3 mb-3">
+        <div class="mb-2">
+            <strong>Nazwa użytkownika:</strong> <span id="username">{{ username }}</span>
+            <button class="btn btn-sm btn-outline-primary ms-2" data-bs-toggle="modal"
+                data-bs-target="#editUsernameModal">Zmiana nazwy</button>
+        </div>
+        <div class="mb-2">
+            <strong>Email:</strong> <span id="email">{{ email }}</span>
+            <button class="btn btn-sm btn-outline-primary ms-2" data-bs-toggle="modal"
+                data-bs-target="#editEmailModal">Zmiana emailu</button>
+        </div>
+        <div>
+            <strong>Hasło:</strong> ********
+            <button class="btn btn-sm btn-outline-primary ms-2" data-bs-toggle="modal"
+                data-bs-target="#editPasswordModal">Zmiana hasła</button>
+        </div>
+    </div>
+    <h2>Pliki na serwerze</h2>
+    <div class="card p-3">
+        <div class="mb-2">
+            <strong>Liczba plików:</strong> <span id="file-count">{{ file_count }}</span>
+        </div>
+        <div>
+            <strong>Łączny rozmiar plików:</strong> <span id="total-size">{{ total_size }}</span>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Zmiana nazwy użytkownika -->
+<div class="modal fade" id="editUsernameModal" tabindex="-1" aria-labelledby="editUsernameModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="POST" action="{{ url_for('update_username') }}">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editUsernameModalLabel">Zmiana nazwy użytkownika</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="password" class="form-control mb-2" name="currentPassword" placeholder="Aktualne hasło"
+                        required>
+                    <input type="text" class="form-control mb-2" name="newUsername" placeholder="Nowa nazwa użytkownika"
+                        value="{{ username }}" required>
+                    <input type="text" class="form-control" name="confirmNewUsername"
+                        placeholder="Potwierdź nową nazwę użytkownika" required>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Anuluj</button>
+                    <button type="submit" class="btn btn-primary">Zapisz zmiany</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Zmiana emailu -->
+<div class="modal fade" id="editEmailModal" tabindex="-1" aria-labelledby="editEmailModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="POST" action="{{ url_for('update_email') }}">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editEmailModalLabel">Zmiana emailu</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="password" class="form-control mb-2" name="currentPassword" placeholder="Aktualne hasło"
+                        required>
+                    <input type="email" class="form-control mb-2" name="newEmail" placeholder="Nowy adres E-mail"
+                        value="{{ email }}" required>
+                    <input type="email" class="form-control" name="confirmNewEmail"
+                        placeholder="Potwierdź nowy adres E-mail" required>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Anuluj</button>
+                    <button type="submit" class="btn btn-primary">Zapisz zmiany</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Zmiana hasła -->
+<div class="modal fade" id="editPasswordModal" tabindex="-1" aria-labelledby="editPasswordModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="POST" action="{{ url_for('update_password') }}">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editPasswordModalLabel">Zmiana hasła</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="password" class="form-control mb-2" name="currentPassword" placeholder="Aktualne hasło"
+                        required>
+                    <input type="password" class="form-control mb-2" name="newPassword" placeholder="Nowe hasło"
+                        required>
+                    <input type="password" class="form-control" name="confirmPassword" placeholder="Potwierdź hasło"
+                        required>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Anuluj</button>
+                    <button type="submit" class="btn btn-primary">Zapisz zmiany</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+
+</body>
+
+</html>

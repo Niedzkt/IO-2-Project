@@ -1,0 +1,9 @@
+<div id="content" class="container-fluid flex-grow-1 p-4" data-bs-theme="dark">
+    <h2>Błąd {{ code }}</h2>
+    <div class="card p-3 mb-3">
+        <p>{{ message }}</p>
+        {% if code == 401 and not current_user.is_authenticated %}
+        <a href="{{ url_for('login') }}" class="btn btn-primary">Zaloguj się</a>
+        {% endif %}
+    </div>
+</div>

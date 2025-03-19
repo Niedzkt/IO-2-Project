@@ -1,0 +1,175 @@
+{% extends 'base.html' %}
+{% block content %}
+<div id="content" class="container-fluid p-4 overflow-auto" data-bs-theme="dark">
+    <h2>Dashboard</h2>
+    <button class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#addFileModal">Dodaj plik</button>
+    
+    <!-- Wyświetlanie komunikatów flash -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <div class="card p-3">
+        <h4>Twoje pliki</h4>
+        <ul class="list-group">
+            {% if files %}
+                {% for file in files %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <span>{{ file.original_filename }}</span>
+                        <div>
+                            <span>{{ format_size(file.size) }}</span>
+                        </div>
+                        <div>
+                            <a href="{{ url_for('download_file', file_id=file.id) }}" class="btn btn-sm btn-outline-success">Pobierz</a>
+                            <button class="btn btn-sm btn-outline-info" data-bs-toggle="modal" data-bs-target="#previewFileModal" onclick="loadFilePreview({{ file.id }})">Podgląd</button>
+                            <button class="btn btn-sm btn-outline-warning" data-bs-toggle="modal" data-bs-target="#editFileModal" onclick="loadFileContent({{ file.id }})">Edytuj</button>
+                            <form action="{{ url_for('delete_file', file_id=file.id) }}" method="POST" style="display:inline;" onsubmit="return confirm('Czy na pewno chcesz usunąć plik {{ file.original_filename }}?');">
+                                <button type="submit" class="btn btn-sm btn-outline-danger">Usuń</button>
+                            </form>
+                        </div>
+                    </li>
+                {% endfor %}
+            {% else %}
+                <li class="list-group-item">Brak plików do wyświetlenia.</li>
+            {% endif %}
+        </ul>
+    </div>
+</div>
+
+<!-- Modal: Dodaj plik -->
+<div class="modal fade" id="addFileModal" tabindex="-1" aria-labelledby="addFileModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="POST" action="{{ url_for('upload_file') }}" enctype="multipart/form-data">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addFileModalLabel">Dodaj plik</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="file" class="form-control" name="file" required>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Anuluj</button>
+                    <button type="submit" class="btn btn-primary">Prześlij</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Edytuj plik -->
+<div class="modal fade" id="editFileModal" tabindex="-1" aria-labelledby="editFileModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <form method="POST" id="editFileForm">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editFileModalLabel">Edytuj plik</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="fileName" class="form-label">Nazwa pliku</label>
+                        <input type="text" class="form-control" id="fileName" name="file_name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="fileContent" class="form-label">Zawartość pliku</label>
+                        <textarea class="form-control" id="fileContent" name="file_content" rows="20" required></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Anuluj</button>
+                    <button type="submit" class="btn btn-primary">Zapisz</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Podgląd pliku -->
+<div class="modal fade" id="previewFileModal" tabindex="-1" aria-labelledby="previewFileModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="previewFileModalLabel">Podgląd pliku</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label for="previewFileName" class="form-label">Nazwa pliku</label>
+                    <input type="text" class="form-control" id="previewFileName" readonly>
+                </div>
+                <div class="mb-3">
+                    <label for="previewFileContent" class="form-label">Zawartość pliku</label>
+                    <textarea class="form-control" id="previewFileContent" rows="20" readonly></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Zamknij</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function loadFileContent(fileId) {
+    fetch(`/edit/${fileId}`, {
+        method: 'GET',
+        headers: {
+            'Accept': 'application/json'
+        }
+    })
+    .then(response => {
+        if (!response.ok) {
+            return response.json().then(err => { throw new Error(err.error); });
+        }
+        return response.json();
+    })
+    .then(data => {
+        document.getElementById('fileName').value = data.file_name;
+        document.getElementById('fileContent').value = data.file_content;
+        document.getElementById('editFileForm').action = `/edit/${data.file_id}`;
+    })
+    .catch(error => {
+        alert(error.message);
+        const modal = bootstrap.Modal.getInstance(document.getElementById('editFileModal'));
+        modal.hide();
+    });
+}
+
+function loadFilePreview(fileId) {
+    fetch(`/preview/${fileId}`, {
+        method: 'GET',
+        headers: {
+            'Accept': 'application/json'
+        }
+    })
+    .then(response => {
+        if (!response.ok) {
+            return response.json().then(err => { throw new Error(err.error); });
+        }
+        return response.json();
+    })
+    .then(data => {
+        document.getElementById('previewFileName').value = data.file_name;
+        document.getElementById('previewFileContent').value = data.file_content;
+    })
+    .catch(error => {
+        alert(error.message);
+        const modal = bootstrap.Modal.getInstance(document.getElementById('previewFileModal'));
+        modal.hide();
+    });
+}
+</script>
+{% endblock %}
+
+
+</body>
+
+</html>
